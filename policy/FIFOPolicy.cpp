@@ -5,14 +5,17 @@
 namespace bufman {
 
     void FIFOPolicy::init(std::size_t pool_size) {
-        queue_.clear();
-        positions_.clear();
+        (void)frame;
     }
 
     void FIFOPolicy::on_access(std::size_t frame) {
     }
 
     void FIFOPolicy::on_load(std::size_t frame) {
+        // avoid adding frame more than once
+        if (positions_.find(frame) != positions_.end()) {
+            return;
+        }
         queue_.push_back(frame);
         positions_[frame] = std::prev(queue_.end());
     }
