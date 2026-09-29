@@ -5,10 +5,13 @@
 namespace bufman {
 
     void FIFOPolicy::init(std::size_t pool_size) {
-        (void)frame;
+        (void)pool_size;
+        queue_.clear();
+        positions_.clear();
     }
 
     void FIFOPolicy::on_access(std::size_t frame) {
+        (void)frame;
     }
 
     void FIFOPolicy::on_load(std::size_t frame) {
