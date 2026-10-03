@@ -14,7 +14,13 @@ std::vector<Part> generate_parts(std::size_t count, int first_part_id) {
         Part part{};
         part.part_id = first_part_id + static_cast<int>(i);
         part.part_weight = 1.0f + static_cast<float>(i);
-        part.part_color = static_cast<int>(i % 6); // use modulo to keep color within the 6 options
+        constexpr int color_count =
+    PART_COLOR_BLUE - PART_COLOR_WHITE + 1;
+
+part.part_color =
+    PART_COLOR_WHITE +
+    static_cast<int>(
+        i % static_cast<std::size_t>(color_count));
         part.part_price = 10.0f + static_cast<float>(i);
 
         // copy leaves space for '\0' at the end of the string

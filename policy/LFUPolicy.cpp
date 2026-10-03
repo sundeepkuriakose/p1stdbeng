@@ -10,6 +10,10 @@ void LFUPolicy::init(std::size_t /*pool_size*/) {
 }
 
 void LFUPolicy::on_load(std::size_t frame) {
+    if (slots_.find(frame) != slots_.end()) {
+        return;
+    }
+
     auto& bucket = buckets_[1];
 
     bucket.push_front(frame);

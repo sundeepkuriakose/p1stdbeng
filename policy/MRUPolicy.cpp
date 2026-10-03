@@ -10,14 +10,17 @@ namespace bufman {
 
     // when a frame is accessed or loaded make it the MRU
     void MRUPolicy::touch(std::size_t frame) {
-        if (positions_[frame] != order_.end()) {
-            // if a position is already recorded, remove its old position
-            order_.erase(positions_[frame]);
-        }
-        // put frame in front and record it's position
-        order_.push_front(frame);
-        positions_[frame] = order_.begin();
+    if (frame >= positions_.size()) {
+        return;
     }
+
+    if (positions_[frame] != order_.end()) {
+        order_.erase(positions_[frame]);
+    }
+
+    order_.push_front(frame);
+    positions_[frame] = order_.begin();
+}
 
     void MRUPolicy::on_access(std::size_t frame) {
         touch(frame);
@@ -28,11 +31,15 @@ namespace bufman {
     }
 
     void MRUPolicy::on_remove(std::size_t frame) {
-        if (positions_[frame] != order_.end()) {
-            order_.erase(positions_[frame]);
-            positions_[frame] = order_.end();
-        }
+    if (frame >= positions_.size()) {
+        return;
     }
+
+    if (positions_[frame] != order_.end()) {
+        order_.erase(positions_[frame]);
+        positions_[frame] = order_.end();
+    }
+}
 
     // optional means it might return a frame number or nothing
     // &: refer to existing vector not make a copy

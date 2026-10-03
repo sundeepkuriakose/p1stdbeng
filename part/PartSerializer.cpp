@@ -1,5 +1,6 @@
 #include "PartSerializer.h"
 
+#include <cmath>
 #include <cstring>
 
 namespace bufman {
@@ -53,11 +54,27 @@ bool deserialize_part(const char* buffer, std::size_t max_len, Part& part) {
 
     std::memcpy(part.part_material, buffer + offset, sizeof(part.part_material));
 
-    return part.part_id >= 0 &&
-           part.part_weight >= 0.0F &&
-           part.part_price >= 0.0F &&
-           part.part_color >= PART_COLOR_WHITE &&
-           part.part_color <= PART_COLOR_BLUE;
+    const bool name_terminated =
+    std::memchr(
+        part.part_name,
+        '\0',
+        sizeof(part.part_name)) != nullptr;
+
+const bool material_terminated =
+    std::memchr(
+        part.part_material,
+        '\0',
+        sizeof(part.part_material)) != nullptr;
+
+return part.part_id >= 0 &&
+       name_terminated &&
+       material_terminated &&
+       std::isfinite(part.part_weight) &&
+       part.part_weight >= 0.0F &&
+       part.part_color >= PART_COLOR_WHITE &&
+       part.part_color <= PART_COLOR_BLUE &&
+       std::isfinite(part.part_price) &&
+       part.part_price >= 0.0F;
 }
 void initialize_part_block(char* block) {
     if (block == nullptr) {
@@ -171,14 +188,24 @@ bool put_part_record(
     std::size_t slot,
     const Part& part) {
     if (block == nullptr ||
-        slot >= kPartsPerBlock ||
-        part.part_id <= 0 ||
-        part.part_weight < 0.0F ||
-        part.part_price < 0.0F ||
-        part.part_color < PART_COLOR_WHITE ||
-        part.part_color > PART_COLOR_BLUE) {
-        return false;
-    }
+    slot >= kPartsPerBlock ||
+    part.part_id <= 0 ||
+    !std::isfinite(part.part_weight) ||
+    part.part_weight < 0.0F ||
+    !std::isfinite(part.part_price) ||
+    part.part_price < 0.0F ||
+    part.part_color < PART_COLOR_WHITE ||
+    part.part_color > PART_COLOR_BLUE ||
+    std::memchr(
+        part.part_name,
+        '\0',
+        sizeof(part.part_name)) == nullptr ||
+    std::memchr(
+        part.part_material,
+        '\0',
+        sizeof(part.part_material)) == nullptr) {
+    return false;
+}
 
     serialize_part(
         part,
